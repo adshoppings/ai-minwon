@@ -5,20 +5,14 @@ export default function Home() {
   const [result, setResult] = useState('');
 
   const handleSubmit = async () => {
-    setResult('생성 중...');
-    try {
-      const res = await fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ input }),
-      });
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ input }),
+    });
 
-      const data = await res.json();
-      setResult(data.result || '결과 없음');
-    } catch (error) {
-      console.error('에러 발생:', error);
-      setResult('민원 생성 중 오류가 발생했습니다.');
-    }
+    const data = await res.json();
+    setResult(data.result || '결과 없음');
   };
 
   return (
@@ -32,9 +26,7 @@ export default function Home() {
         style={{ width: '100%' }}
       />
       <br />
-      <button onClick={handleSubmit} style={{ marginTop: 12 }}>
-        민원 생성하기
-      </button>
+      <button onClick={handleSubmit} style={{ marginTop: 12 }}>민원 생성하기</button>
       <div style={{ marginTop: 24 }}>
         <h3>작성된 민원서</h3>
         <div>{result}</div>
