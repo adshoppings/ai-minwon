@@ -5,16 +5,18 @@ export default function Home() {
   const [result, setResult] = useState('');
 
   const handleSubmit = async () => {
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ input }),
-    });
-
-    const data = await res.json();
-    setResult(data.result);
+    try {
+      const res = await fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ input }),
+      });
+      const data = await res.json();
+      setResult(data.result || '결과 없음');
+    } catch (error) {
+      console.error('에러 발생:', error);
+      setResult('에러 발생');
+    }
   };
 
   return (
