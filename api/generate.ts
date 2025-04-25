@@ -1,25 +1,28 @@
-// /api/generate.ts
-export default async function handler(req, res) {
+// /pages/api/generate.ts
+
+import type { NextApiRequest, NextApiResponse } from 'next';
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { input } = req.body;
+  const input = req.body?.input;
 
   if (!input) {
-    return res.status(400).json({ error: 'No input provided' });
+    return res.status(400).json({ error: 'Input is required' });
   }
 
-  if (!process.env.OPENAI_API_KEY) {
-    console.error("❌ OPENAI_API_KEY is not defined in environment variables.");
-    return res.status(500).json({ error: 'OPENAI_API_KEY is not set on server' });
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: 'OPENAI_API_KEY not set in environment' });
   }
 
   try {
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -31,15 +34,15 @@ export default async function handler(req, res) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('❌ GPT API 오류:', data);
-      return res.status(500).json({ error: data?.error?.message || 'GPT API error' });
+      console.error('[OpenAI API Error]', data);
+      return res.status(500).json({ error: data.error?.message || 'OpenAI API error' });
     }
 
-    const result = data.choices?.[0]?.message?.content?.trim() || 'GPT 응답 없음';
+    const result = data.choices?.[0]?.message?.content;
     return res.status(200).json({ result });
 
-  } catch (error) {
-    console.error("❌ 서버 오류:", error);
-    return res.status(500).json({ error: 'Internal server error' });
+  } catch (error: any) {
+    console.error('[Server Error]', error.message || error);
+    return res.status(500).json({ error: 'Internal Server Error' });
   }
 }
