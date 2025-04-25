@@ -1,22 +1,14 @@
-export default async function handler(req, res) {
-  const { content } = req.body;
+import type { NextApiRequest, NextApiResponse } from 'next';
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`
-    },
-    body: JSON.stringify({
-      model: 'gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: '너는 민원서 작성 도우미야.' },
-        { role: 'user', content: `다음 내용을 바탕으로 민원서를 공손하게 작성해줘:\n${content}` }
-      ]
-    })
-  });
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
 
-  const data = await response.json();
-  res.status(200).json({ result: data.choices?.[0]?.message?.content });
+  const { input } = req.body;
+
+  // 실제 GPT API 호출 대신, 테스트용 mock 응답
+  const responseText = `입력한 내용: "${input}" 에 대한 민원이 성공적으로 작성되었습니다.`;
+
+  return res.status(200).json({ result: responseText });
 }
-// 여기에 GPT 호출 API 코드가 들어갈 예정입니다.
