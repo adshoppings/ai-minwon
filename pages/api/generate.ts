@@ -1,31 +1,47 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import OpenAI from 'openai';
+// /pages/api/generate.ts
 
-const openai = new OpenAI({
+import type { NextApiRequest, NextApiResponse } from 'next';
+import { Configuration, OpenAIApi } from 'openai';
+
+const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+const openai = new OpenAIApi(configuration);
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { input } = req.body;
 
-  if (!input || typeof input !== 'string') {
-    return res.status(400).json({ error: 'Invalid input' });
+  if (!input) {
+    return res.status(400).json({ error: 'Input is required' });
   }
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: input }],
+      messages: [
+        {
+          role: 'system',
+          content: '너는 민원을 대신 써주는 민원 작성 도우미야.',
+        },
+        {
+          role: 'user',
+          content: input,
+        },
+      ],
     });
 
-    const response = completion.choices[0]?.message?.content?.trim() || '결과 없음';
-    return res.status(200).json({ result: response });
+    const result = completion.data.choices[0].message?.content;
+    res.status(200).json({ result });
   } catch (error: any) {
-    console.error('OpenAI Error:', error.message);
-    return res.status(500).json({ error: 'OpenAI 호출 중 에러 발생' });
+    console.error('OpenAI error:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to generate response' });
   }
 }
