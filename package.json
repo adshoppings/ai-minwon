@@ -11,11 +11,12 @@
   "dependencies": {
     "next": "latest",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "openai": "^4.19.0"
   },
   "devDependencies": {
-    "typescript": "^5.2.2",
-    "@types/react": "^18.2.7",
-    "@types/node": "^18.17.18"
+    "typescript": "^5.3.3",
+    "@types/react": "^18.2.0",
+    "@types/node": "^20.4.2"
   }
 }
