@@ -1,4 +1,4 @@
-// /pages/api/generate.ts
+// pages/api/generate.ts
 
 import type { NextApiRequest, NextApiResponse } from 'next';
 
@@ -8,14 +8,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   const input = req.body?.input;
-
   if (!input) {
     return res.status(400).json({ error: 'Input is required' });
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'OPENAI_API_KEY not set in environment' });
+    return res.status(500).json({ error: 'API key not found' });
   }
 
   try {
@@ -34,15 +33,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('[OpenAI API Error]', data);
-      return res.status(500).json({ error: data.error?.message || 'OpenAI API error' });
+      return res.status(500).json({ error: data?.error?.message || 'OpenAI API error' });
     }
 
     const result = data.choices?.[0]?.message?.content;
     return res.status(200).json({ result });
 
-  } catch (error: any) {
-    console.error('[Server Error]', error.message || error);
-    return res.status(500).json({ error: 'Internal Server Error' });
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || 'Internal Server Error' });
   }
 }
