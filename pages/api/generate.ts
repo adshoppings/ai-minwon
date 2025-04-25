@@ -1,26 +1,31 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { OpenAI } from 'openai';
+import { Configuration, OpenAIApi } from 'openai';
 
-const openai = new OpenAI({
+const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
+const openai = new OpenAIApi(configuration);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  try {
-    const { input } = req.body;
+  const { input } = req.body;
+  if (!input) {
+    return res.status(400).json({ error: 'No input provided' });
+  }
 
-    const completion = await openai.chat.completions.create({
-      messages: [{ role: 'user', content: `${input} 관련 민원서로 작성해줘.` }],
+  try {
+    const completion = await openai.createChatCompletion({
       model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: input }],
     });
 
-    res.status(200).json({ result: completion.choices[0].message.content });
+    const result = completion.data.choices[0].message?.content;
+    res.status(200).json({ result });
   } catch (error: any) {
-    console.error('API Error:', error);
+    console.error('OpenAI Error:', error);
     res.status(500).json({ error: 'Failed to generate response' });
   }
 }
