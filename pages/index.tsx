@@ -1,8 +1,23 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = '/pdf-helper.html';
+    script.type = 'text/html';
+    document.body.appendChild(script);
+  }, []);
+
+  const handleDownloadPDF = () => {
+    if (typeof window !== 'undefined' && (window as any).exportToPdf) {
+      (window as any).exportToPdf(`<h1>작성된 민원서</h1><p>${result}</p>`);
+    } else {
+      alert('PDF 변환기 로딩 실패');
+    }
+  };
 
   const handleSubmit = async () => {
     try {
@@ -33,6 +48,11 @@ export default function Home() {
       <button onClick={handleSubmit} style={{ marginTop: 12 }}>
         민원 생성하기
       </button>
+      {result && (
+        <button onClick={handleDownloadPDF} style={{ marginLeft: 10 }}>
+          PDF 저장
+        </button>
+      )}
       <div style={{ marginTop: 24 }}>
         <h3>작성된 민원서</h3>
         <div>{result}</div>

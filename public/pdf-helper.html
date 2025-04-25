@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  </head>
+  <body>
+    <script>
+      window.exportToPdf = function (html) {
+        const element = document.createElement('div');
+        element.innerHTML = html;
+        html2pdf().from(element).save('민원서.pdf');
+      };
+    </script>
+  </body>
+</html>
