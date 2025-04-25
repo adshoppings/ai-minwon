@@ -1,6 +1,7 @@
 {
-  "name": "minwon-template",
+  "name": "ai-minwon-gpt",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -11,7 +12,7 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "openai": "^4.20.0",
+    "openai": "^4.19.0",
     "html2pdf.js": "^0.10.1"
   },
   "devDependencies": {

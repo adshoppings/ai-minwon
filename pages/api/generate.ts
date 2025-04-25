@@ -5,16 +5,12 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: '허용되지 않은 메서드입니다.' });
   }
 
   const { input } = req.body;
-
   if (!input) {
     return res.status(400).json({ error: '입력값이 없습니다.' });
   }
@@ -24,16 +20,19 @@ export default async function handler(
       model: 'gpt-3.5-turbo',
       messages: [{
         role: 'user',
-        content: `아래 민원 요청에 대해 감성적이고 친절한 어투로 설명해줘. 그리고 사용자가 어떤 서식으로 작성해야 할지도 함께 안내해줘.
-
-"${input}"`
-      }],
+        content: `아래 주제에 대해 친절한 민원 답변 형식으로 HTML 서식 포함해서 작성해줘.
+- 문단 제목은 <strong> 사용
+- 줄바꿈은 <br> 사용
+- 리스트 항목은 <ul><li> 사용
+- 전체는 HTML 형식
+주제: ${input}`
+      }]
     });
 
     const result = completion.choices[0]?.message?.content?.trim() || '';
     res.status(200).json({ result });
-  } catch (error) {
-    console.error('OpenAI API 에러:', error);
-    res.status(500).json({ error: '민원 생성 실패' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'OpenAI 응답 실패' });
   }
 }
