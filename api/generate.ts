@@ -7,8 +7,22 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   const { input } = req.body;
 
-  // 실제 GPT API 호출 대신, 테스트용 mock 응답
-  const responseText = `입력한 내용: "${input}" 에 대한 민원이 성공적으로 작성되었습니다.`;
+  const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+    },
+    body: JSON.stringify({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        { role: 'system', content: '너는 민원서를 공손하게 작성해주는 AI야.' },
+        { role: 'user', content: input }
+      ],
+    }),
+  });
 
-  return res.status(200).json({ result: responseText });
+  const data = await response.json();
+  const result = data.choices?.[0]?.message?.content || '응답 없음';
+  return res.status(200).json({ result });
 }
