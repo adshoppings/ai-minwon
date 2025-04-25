@@ -1,18 +1,12 @@
-import { useState, useRef, useEffect } from 'react';
+// pages/index.tsx
+import { useState, useRef } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
-  const [html2pdf, setHtml2pdf] = useState<any>(null);
   const resultRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      import('html2pdf.js').then((mod) => {
-        setHtml2pdf(mod.default || mod);
-      });
-    }
-  }, []);
 
   const handleSubmit = async () => {
     const res = await fetch('/api/generate', {
@@ -25,33 +19,44 @@ export default function Home() {
     setResult(data.result || '결과 없음');
   };
 
-  const handleSavePDF = () => {
-    if (!html2pdf || !resultRef.current) {
-      alert('PDF 변환기 로딩 실패');
-      return;
-    }
+  const handleDownloadPDF = async () => {
+    if (!resultRef.current) return alert('PDF 변환 대상이 없습니다.');
 
-    html2pdf().from(resultRef.current).save('minwon.pdf');
+    const canvas = await html2canvas(resultRef.current);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+    pdf.save('민원_자동작성.pdf');
   };
 
   return (
-    <div style={{ padding: 40, maxWidth: 600, margin: '0 auto' }}>
-      <h1>GPT 민원 자동작성</h1>
+    <div style={{ maxWidth: 700, margin: '0 auto', padding: 40, fontFamily: 'Arial' }}>
+      <h1 style={{ fontSize: '1.8rem', fontWeight: 'bold' }}>GPT 민원 자동작성</h1>
+
       <textarea
         placeholder="민원 내용을 입력해주세요"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         rows={6}
-        style={{ width: '100%' }}
+        style={{ width: '100%', padding: 10, fontSize: '1rem', marginTop: 20 }}
       />
-      <br />
-      <button onClick={handleSubmit}>민원 생성하기</button>
-      <button onClick={handleSavePDF} style={{ marginLeft: 10 }}>
-        PDF 저장
-      </button>
-      <div style={{ marginTop: 24 }}>
-        <h3>작성된 민원서</h3>
-        <div ref={resultRef}>{result}</div>
+
+      <div style={{ marginTop: 20 }}>
+        <button onClick={handleSubmit} style={{ marginRight: 10, padding: '10px 16px' }}>
+          민원 생성하기
+        </button>
+        <button onClick={handleDownloadPDF} style={{ padding: '10px 16px' }}>
+          PDF 저장
+        </button>
+      </div>
+
+      <div ref={resultRef} style={{ marginTop: 40, borderTop: '1px solid #ccc', paddingTop: 20 }}>
+        <h3 style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>작성된 민원서</h3>
+        <p style={{ lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{result}</p>
       </div>
     </div>
   );
