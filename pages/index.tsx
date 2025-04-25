@@ -1,4 +1,3 @@
-// pages/index.tsx
 import { useState } from 'react';
 
 export default function Home() {
@@ -8,27 +7,33 @@ export default function Home() {
   const handleSubmit = async () => {
     const res = await fetch('/api/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({ input }),
     });
+
     const data = await res.json();
     setResult(data.result);
   };
 
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: 40, maxWidth: 600, margin: '0 auto' }}>
       <h1>GPT 민원 자동작성</h1>
       <textarea
+        placeholder="민원 내용을 입력해주세요"
         value={input}
         onChange={(e) => setInput(e.target.value)}
-        placeholder="민원 내용을 입력해 주세요"
+        rows={6}
         style={{ width: '100%' }}
       />
       <br />
-      <button onClick={handleSubmit}>민원 생성하기</button>
-      <div>
-        <h3>생성된 민원:</h3>
-        <p>{result}</p>
+      <button onClick={handleSubmit} style={{ marginTop: 12 }}>
+        민원 생성하기
+      </button>
+      <div style={{ marginTop: 24 }}>
+        <h3>작성된 민원서</h3>
+        <div>{result}</div>
       </div>
     </div>
   );
