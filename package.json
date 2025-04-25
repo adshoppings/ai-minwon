@@ -9,15 +9,15 @@
     "vercel-build": "next build"
   },
   "dependencies": {
+    "html2pdf.js": "^0.10.1",
     "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
     "openai": "^4.19.0",
-    "html2pdf.js": "^0.10.1"
+    "react": "latest",
+    "react-dom": "latest"
   },
   "devDependencies": {
-    "typescript": "^5.3.3",
+    "@types/node": "^20.4.2",
     "@types/react": "^18.2.0",
-    "@types/node": "^20.4.2"
+    "typescript": "^5.3.3"
   }
 }
