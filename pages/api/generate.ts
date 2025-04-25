@@ -22,7 +22,12 @@ export default async function handler(
   try {
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: input }],
+      messages: [{
+        role: 'user',
+        content: `아래 민원 요청에 대해 감성적이고 친절한 어투로 설명해줘. 그리고 사용자가 어떤 서식으로 작성해야 할지도 함께 안내해줘.
+
+"${input}"`
+      }],
     });
 
     const result = completion.choices[0]?.message?.content?.trim() || '';

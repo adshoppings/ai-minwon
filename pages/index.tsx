@@ -1,23 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState, useRef } from 'react';
+import html2pdf from 'html2pdf.js';
 
 export default function Home() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = '/pdf-helper.html';
-    script.type = 'text/html';
-    document.body.appendChild(script);
-  }, []);
-
-  const handleDownloadPDF = () => {
-    if (typeof window !== 'undefined' && (window as any).exportToPdf) {
-      (window as any).exportToPdf(`<h1>작성된 민원서</h1><p>${result}</p>`);
-    } else {
-      alert('PDF 변환기 로딩 실패');
-    }
-  };
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async () => {
     try {
@@ -34,8 +21,18 @@ export default function Home() {
     }
   };
 
+  const handleDownloadPDF = () => {
+    if (!resultRef.current) {
+      alert('PDF로 저장할 내용이 없습니다.');
+      return;
+    }
+    html2pdf().from(resultRef.current).save('minwon.pdf').catch(() => {
+      alert('PDF 변환기 로딩 실패');
+    });
+  };
+
   return (
-    <div style={{ padding: 40, maxWidth: 600, margin: '0 auto' }}>
+    <div style={{ padding: 40, maxWidth: 800, margin: '0 auto' }}>
       <h1>GPT 민원 자동작성</h1>
       <textarea
         placeholder="민원 내용을 입력해주세요"
@@ -45,15 +42,11 @@ export default function Home() {
         style={{ width: '100%' }}
       />
       <br />
-      <button onClick={handleSubmit} style={{ marginTop: 12 }}>
+      <button onClick={handleSubmit} style={{ marginTop: 12, marginRight: 10 }}>
         민원 생성하기
       </button>
-      {result && (
-        <button onClick={handleDownloadPDF} style={{ marginLeft: 10 }}>
-          PDF 저장
-        </button>
-      )}
-      <div style={{ marginTop: 24 }}>
+      <button onClick={handleDownloadPDF}>PDF 저장</button>
+      <div ref={resultRef} style={{ marginTop: 24 }}>
         <h3>작성된 민원서</h3>
         <div>{result}</div>
       </div>
