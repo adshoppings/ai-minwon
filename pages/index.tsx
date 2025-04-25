@@ -3,59 +3,41 @@ import { useState } from 'react';
 export default function Home() {
   const [input, setInput] = useState('');
   const [result, setResult] = useState('');
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!input.trim()) {
-      setResult('내용을 입력해주세요.');
-      return;
-    }
-
-    setLoading(true);
-    setResult('');
-
+    setResult('생성 중...');
     try {
-      const response = await fetch('/api/generate', {
+      const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ input }),
       });
 
-      const data = await response.json();
+      const data = await res.json();
       setResult(data.result || '결과 없음');
     } catch (error) {
       console.error('에러 발생:', error);
-      setResult('에러가 발생했습니다.');
-    } finally {
-      setLoading(false);
+      setResult('민원 생성 중 오류가 발생했습니다.');
     }
   };
 
   return (
-    <div style={{ padding: 40, maxWidth: 600, margin: '0 auto', fontFamily: 'sans-serif' }}>
-      <h1 style={{ fontWeight: 'bold' }}>GPT 민원 자동작성</h1>
-
+    <div style={{ padding: 40, maxWidth: 600, margin: '0 auto' }}>
+      <h1>GPT 민원 자동작성</h1>
       <textarea
         placeholder="민원 내용을 입력해주세요"
         value={input}
         onChange={(e) => setInput(e.target.value)}
         rows={6}
-        style={{ width: '100%', padding: 10, fontSize: 14, marginTop: 12 }}
+        style={{ width: '100%' }}
       />
-
-      <button
-        onClick={handleSubmit}
-        style={{ marginTop: 12, padding: '10px 16px', fontSize: 14 }}
-        disabled={loading}
-      >
-        {loading ? '생성 중...' : '민원 생성하기'}
+      <br />
+      <button onClick={handleSubmit} style={{ marginTop: 12 }}>
+        민원 생성하기
       </button>
-
-      <div style={{ marginTop: 32 }}>
-        <h3 style={{ fontWeight: 'bold' }}>작성된 민원서</h3>
-        <div style={{ whiteSpace: 'pre-wrap', marginTop: 8 }}>
-          {result || '결과 없음'}
-        </div>
+      <div style={{ marginTop: 24 }}>
+        <h3>작성된 민원서</h3>
+        <div>{result}</div>
       </div>
     </div>
   );
